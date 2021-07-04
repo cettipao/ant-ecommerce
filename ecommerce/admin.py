@@ -2,25 +2,25 @@ from django.contrib import admin
 from .models import *
 
 # Register your models here.
-class ProductoAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'ultimo_precio', 'category', 'stock']
-    list_display_links = ['titulo', 'ultimo_precio', 'category', 'stock']
-    search_fields = ['titlo',]
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['title', 'last_price', 'category', 'stock']
+    list_display_links = ['title', 'last_price', 'category', 'stock']
+    search_fields = ['title',]
     list_filter = ['category',]
 
-class CarritoAdmin(admin.ModelAdmin):
-    list_display = ['usuario', 'fecha_inicio', 'fecha_final', 'total','confirmado',]
-    list_display_links = ['usuario', 'fecha_inicio', 'fecha_final', 'total', 'confirmado',]
-    list_filter = ['usuario', 'confirmado']
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['user', 'initial_date', 'final_date', 'total','confirmed',]
+    list_display_links = ['user', 'initial_date', 'final_date', 'total', 'confirmed',]
+    list_filter = ['user', 'confirmed']
 
-class ItemCarritoAdmin(admin.ModelAdmin):
-    list_display = ['producto', 'carrito', 'cantidad', 'precio',]
-    list_display_links = ['producto', 'carrito', 'cantidad', 'precio',]
-    list_filter = ['producto', 'carrito',]
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ['product', 'cart', 'amount', 'price',]
+    list_display_links = ['product', 'cart', 'amount', 'price',]
+    list_filter = ['product', 'cart',]
 
-admin.site.register(Categoria)
-admin.site.register(Proveedor)
-admin.site.register(Producto, ProductoAdmin)
-admin.site.register(ItemCarrito, ItemCarritoAdmin)
-admin.site.register(Carrito, CarritoAdmin)
-admin.site.register(CompraProducto)
+admin.site.register(Category)
+admin.site.register(Supplier)
+admin.site.register(Product, ProductAdmin)
+admin.site.register(CartItem, CartItemAdmin)
+admin.site.register(Cart, CartAdmin)
+admin.site.register(StockUp)

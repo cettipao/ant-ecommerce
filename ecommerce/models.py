@@ -5,85 +5,81 @@ from django.db import models
 from django.db.models import Sum
 
 
-class Categoria(models.Model):
-    titulo = models.CharField(max_length=100)
-    descripcion = models.TextField(default="", blank=True)
+class Category(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(default="", blank=True)
     image = models.ImageField(null=True, blank=True)
 
     slug = models.SlugField()
 
     def __str__(self):
-        return self.titulo
+        return self.title
 
 
-class Proveedor(models.Model):
-    nombre = models.CharField(max_length=100)
+class Supplier(models.Model):
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.nombre
+        return self.name
 
-    class Meta:
-        verbose_name_plural = "Proveedores"
 
-class Producto(models.Model):
-    titulo = models.CharField(max_length=100)
-    ultimo_precio = models.FloatField()
-    category = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    #proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
-    #stock = models.IntegerField()
-    descripcion = models.TextField(default="", blank=True)
+class Product(models.Model):
+    title = models.CharField(max_length=100)
+    last_price = models.FloatField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    description = models.TextField(default="", blank=True)
     image = models.ImageField(null=True, blank=True)
 
     slug = models.SlugField()
 
     @property
     def stock(self):
-        stockCompra = CompraProducto.objects.filter(producto=self).aggregate(sum=Sum("cantidad")).get("sum")
-        stockVenta = ItemCarrito.objects.filter(producto=self, carrito__confirmado=True).aggregate(sum=Sum("cantidad")).get("sum")
-        if stockCompra == None:
-            stockCompra = 0
-        if stockVenta == None:
-            stockVenta = 0
+        boughtStock = StockUp.objects.filter(product=self).aggregate(sum=Sum("amount")).get("sum")
+        soldStock = CartItem.objects.filter(product=self, cart__confirmed=True).aggregate(sum=Sum("amount")).get("sum")
+        if boughtStock == None:
+            boughtStock = 0
+        if soldStock == None:
+            soldStock = 0
 
-        print("{} stockCompra: {}, stockVenta: {}".format(self.titulo, stockCompra, stockVenta))
-        return stockCompra - stockVenta
-
-    def __str__(self):
-        return self.titulo
-
-class Carrito(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    fecha_inicio = models.DateTimeField(auto_now_add=True)
-    fecha_final = models.DateTimeField(null=True, blank=True)
-    confirmado = models.BooleanField(default=False)
+        print("{} stockCompra: {}, stockVenta: {}".format(self.title, boughtStock, soldStock))
+        return boughtStock - soldStock
 
     def __str__(self):
-        return "{} ({})".format(self.usuario.username, self.fecha_inicio)
+        return self.title
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    initial_date = models.DateTimeField(auto_now_add=True)
+    final_date = models.DateTimeField(null=True, blank=True)
+    confirmed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "{} ({})".format(self.user.username, self.initial_date)
 
     @property
     def total(self):
         total = 0
-        for itemCarrito in ItemCarrito.objects.filter(carrito=self):
-            total += itemCarrito.precio * itemCarrito.cantidad
+        for itemCart in CartItem.objects.filter(cart=self):
+            total += itemCart.price * itemCart.amount
         return total
 
 
-class ItemCarrito(models.Model):
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
-    cantidad = models.SmallIntegerField()
-    precio = models.FloatField()
+class CartItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    amount = models.SmallIntegerField()
+    price = models.FloatField()
 
     def __str__(self):
-        return "{}: {} ({})".format(self.carrito.usuario.username, self.producto, self.cantidad)
+        return "{}: {} ({})".format(self.cart.user.username, self.product, self.amount)
 
-class CompraProducto(models.Model):
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
-    cantidad = models.SmallIntegerField()
-    precio = models.FloatField()
-    fecha = models.DateTimeField(auto_now_add=True)
+class StockUp(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    amount = models.SmallIntegerField()
+    price = models.FloatField()
+    date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{}: {} ({})".format(self.producto, self.proveedor, self.cantidad)
+        return "{}: {} ({})".format(self.product, self.supplier, self.amount)
 
