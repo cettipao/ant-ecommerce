@@ -22,7 +22,8 @@ from config import settings
 urlpatterns = [
     path('jet/', include('jet.urls', 'jet')),  # Django JET URLS
     path('admin/', admin.site.urls),
-    path('api/', include('ecommerce.urls', 'ecommerce'))
+    path('api/', include('ecommerce.urls', 'ecommerce')),
+    path('api-auth/', include('rest_framework.urls')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

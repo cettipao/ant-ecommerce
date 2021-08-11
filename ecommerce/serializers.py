@@ -19,17 +19,23 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = '__all__'
 
-class CartSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Cart
-        fields = '__all__'
-
 class CartItemSerializer(serializers.ModelSerializer):
+
 
     class Meta:
         model = CartItem
-        fields = '__all__'
+        fields = ['product', 'cart', 'amount', 'price',]
+
+class CartSerializer(serializers.ModelSerializer):
+    cartItems = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='ecommerce:cartitems-detail'
+    )
+
+    class Meta:
+        model = Cart
+        fields = ['user', 'initial_date', 'final_date', 'confirmed', 'cartItems']
 
 class StockUpSerializer(serializers.ModelSerializer):
 
